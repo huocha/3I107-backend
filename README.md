@@ -35,15 +35,15 @@ run io.vertx.starter.MainVerticle
 
 ## Usage pricipal
 Grandes étapes
-[] 1. Développer l’API REST
+- [] 1. Développer l’API REST
 Définir une API REST standard permettant d’effectuer les 4 opérations ci-dessus.
-[] 2. Ajouter le support des tables / index
+- [] 2. Ajouter le support des tables / index
 La structure interne restera simple (HashMap, ...) mais permettra d’obtenir des premiers résultats probants sur une faible volumétrie.
-[] 3. Charger de la données
+- [] 3. Charger de la données
 Réaliser le parsing du CSV et l’ingestion des lignes dans les index d’une table
-[] 4. Distribuer le serveur
+- [] 4. Distribuer le serveur
 Être capable de faire communiquer les noeuds. Lorsqu’une action s’effectue sur un noeud, elle est répercutée sur les autres. Chaque noeud connaît les tables, index ... LEs notions de tolérance aux pannes et réplication ne sont pas l’objectif du projet.
-[] 5. Rendre le programme performant
+- [] 5. Rendre le programme performant
 - Être capable d’avoir le plus de lignes en mémoire disponible
 - Loader / Récupérer de la donnée le plus vite possible
 - Découvrir les techniques d’indexation (B-Tree, hash, ... )

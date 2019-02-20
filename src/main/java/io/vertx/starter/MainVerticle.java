@@ -10,6 +10,8 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -31,6 +33,12 @@ private Map<String, JsonObject> products = new HashMap<>();
 	  Router router = Router.router(vertx);
 	    
 	    router.route().handler(BodyHandler.create());
+	    // create a table (with postData in the body)
+	    router.put("/table/:tableName").handler(this::createTable);
+	    
+	    // get a table existed, ?query=name="A"&age=21
+	    router.get("/table/:tableName").handler(this::handleGetProduct);
+	    
 	    router.get("/products/:productID").handler(this::handleGetProduct);
 	    router.put("/products/:productID").handler(this::handleAddProduct);
 	    router.get("/products").handler(this::handleListProducts);
@@ -38,6 +46,34 @@ private Map<String, JsonObject> products = new HashMap<>();
 	    vertx
 	    	.createHttpServer()
 	    	.requestHandler(router::accept).listen( 8080 );
+  }
+
+ 
+  private void createTable(RoutingContext routingContext) {
+	  String tableName = routingContext.request().getParam("tableName");
+	  
+	  HttpServerResponse response = routingContext.response();
+	  
+	  // if table not exist => create one, otherwise return error
+	  if (tableName != null) {
+		  createFile(tableName);
+	  }
+	  
+	  System.out.println(response);
+  }
+  
+  
+  
+  
+  private void createFile(String tableName) {
+	  // create new file in the path "/ressource/tableName.json" 
+	  
+  }
+  
+
+  private void loadFile(String nameFile) {
+	  // search in "/ressource/nameFile"
+	  
   }
   
   /**
