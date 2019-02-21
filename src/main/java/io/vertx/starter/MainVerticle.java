@@ -1,9 +1,13 @@
 package io.vertx.starter;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,7 +15,6 @@ import java.util.UUID;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -42,7 +45,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 	    router.put("/table/:tableName").handler(this::createTable);
 	    
 	    // get a table existed, ?query=name="A"&age=21
-	    router.get("/table/:tableName").handler(this::handleGetProduct);
+	    router.get("/table/:tableName").handler(this::getTable);
 	    
 	    router.get("/products/:productID").handler(this::handleGetProduct);
 	    router.put("/products/:productID").handler(this::handleAddProduct);
@@ -81,6 +84,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  // if table not exist => create one, otherwise return error
 	  if (tableName != null) {
 		  createFile(tableName, dataBody);
+		  
 	  }
 	  
 	  // #TODO: need to return a success or fail message
@@ -92,7 +96,7 @@ private static String workingDirectory = System.getProperty("user.dir");
   private void createFile(String tableName, JsonObject dataBody) {
 	  // create new file in the path "/ressource/tableName.json" 
 	  String filePath = workingDirectory + "/ressource/"+tableName+".json";
-	  System.out.println("File repo = " + filePath);
+	  log("File repo = " + filePath);
 	  
 	  File newTableFile = new File(filePath);
 		if (!newTableFile.exists()) {
@@ -103,7 +107,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 				}
 				newTableFile.createNewFile();
 			} catch (IOException e) {
-				System.out.println("Excepton Occured: " + e.toString());
+				log("Excepton Occured: " + e.toString());
 			}
 		}
 
@@ -119,14 +123,68 @@ private static String workingDirectory = System.getProperty("user.dir");
 
 			
 		} catch (IOException e) {
-			System.out.println("Excepton Occured: " + e.toString());
+			log("Excepton Occured: " + e.toString());
 		}
   }
   
-
-  private void loadFile(String nameFile) {
-	  // search in "/ressource/nameFile"
+  private void getTable(RoutingContext routingContext) {
+	  String tableName = routingContext.request().getParam("tableName");
 	  
+	  HttpServerResponse response = routingContext.response();
+	  
+	  String filePath = workingDirectory + "/ressource/"+tableName+".json";
+	  JsonObject getData;
+	  if (tableName != null) {
+		  try {
+			getData = loadFile(filePath);
+			response.putHeader("content-type", "application/json").end(getData.encodePrettily());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		  
+	  }
+	  
+	  else { sendError(400, response); }
+		  
+	  
+	  
+  }
+  
+  public static String readAll(Reader rd) throws IOException {
+      StringBuilder sb = new StringBuilder();
+      int cp;
+      while ((cp = rd.read()) != -1) {
+          sb.append((char) cp);
+      }
+      return sb.toString();
+  }
+  
+  private JsonObject loadFile(String nameFile) throws Exception {
+	  // search in "/ressource/nameFile"
+	  JsonObject myReader;
+	  File loadFileTable = new File(nameFile);
+	  if (!loadFileTable.exists()){ log("File doesn't exist"); }
+	  
+	  InputStreamReader isReader;
+	  
+	  try {
+		  isReader = new InputStreamReader(new FileInputStream(loadFileTable), "UTF-8");
+		  BufferedReader rd = new BufferedReader(isReader);
+		  String jsonText = readAll(rd);
+					
+		  myReader = new JsonObject(jsonText);
+		  return myReader;
+		  
+	  } catch (Exception e) {
+		log("error load cache from file " + e.toString());
+		throw e;
+	  } 
+
+  }
+  
+  private static void log(String string) {
+		System.out.println(string);
   }
   
   /**
