@@ -34,4 +34,20 @@ public class formattedJson {
 		return formattedJson;
 			
 	}
+	
+	public JsonObject loadKey(String tableName) {
+		JsonArray arr = new JsonArray();
+		
+		this.object.forEach(entry -> { 
+			JsonObject field = new JsonObject();
+			field.put("name", "id").put("type", "uuid");
+			field.put("name", entry.getKey()).put("type", ""); 
+			arr.add(field);
+		});
+		
+		JsonObject jsonWithField = new JsonObject();
+		jsonWithField.put("table", tableName).put("field", arr);
+		
+		return jsonWithField;
+	}
 }

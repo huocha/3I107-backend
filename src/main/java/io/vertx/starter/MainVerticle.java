@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import io.vertx.core.AbstractVerticle;
@@ -18,6 +19,7 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -34,8 +36,6 @@ private static String workingDirectory = System.getProperty("user.dir");
 
   @Override
   public void start() throws Exception {
-	  // load data
-	  setUpInitialData();
 	  
 	  // initialiser les routes
 	  Router router = Router.router(vertx);
@@ -46,11 +46,10 @@ private static String workingDirectory = System.getProperty("user.dir");
 	    
 	    // get a table existed, ?query=name="A"&age=21
 	    router.get("/table/:tableName").handler(this::getTable);
-	    
-	    router.get("/products/:productID").handler(this::handleGetProduct);
-	    router.put("/products/:productID").handler(this::handleAddProduct);
-	    router.get("/products").handler(this::handleListProducts);
-	    
+	        
+	    // #TODO: upload one file each time, not consider the multi-file 
+	    router.post("/table/:tableName/importData").handler(this::handleImport);
+		    
 	    vertx
 	    	.createHttpServer()
 	    	.requestHandler(router::accept).listen( 8080 );
@@ -91,7 +90,6 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  response.end();
 
   }
-  
   
   private void createFile(String tableName, JsonObject dataBody) {
 	  // create new file in the path "/ressource/tableName.json" 
@@ -136,18 +134,15 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  JsonObject getData;
 	  if (tableName != null) {
 		  try {
-			getData = loadFile(filePath);
+			getData = loadJsonFromFile(filePath);
 			response.putHeader("content-type", "application/json").end(getData.encodePrettily());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		  
+			sendError(400, response);
+		}  
 	  }
 	  
-	  else { sendError(400, response); }
-		  
-	  
+	  else { sendError(400, response); }  
 	  
   }
   
@@ -160,7 +155,7 @@ private static String workingDirectory = System.getProperty("user.dir");
       return sb.toString();
   }
   
-  private JsonObject loadFile(String nameFile) throws Exception {
+  private JsonObject loadJsonFromFile(String nameFile) throws Exception {
 	  // search in "/ressource/nameFile"
 	  JsonObject myReader;
 	  File loadFileTable = new File(nameFile);
@@ -183,63 +178,82 @@ private static String workingDirectory = System.getProperty("user.dir");
 
   }
   
-  private static void log(String string) {
-		System.out.println(string);
+  private JsonArray loadJsonArrayFromFile(String nameFile) throws Exception {
+	// search in "/ressource/nameFile"
+	  JsonArray myReader;
+	  File loadFileTable = new File(nameFile);
+	  if (!loadFileTable.exists()){ log("File doesn't exist"); }
+	  
+	  InputStreamReader isReader;
+	  
+	  try {
+		  isReader = new InputStreamReader(new FileInputStream(loadFileTable), "UTF-8");
+		  BufferedReader rd = new BufferedReader(isReader);
+		  String jsonText = readAll(rd);
+					
+		  myReader = new JsonArray(jsonText);
+		  return myReader;
+		  
+	  } catch (Exception e) {
+		log("error load cache from file " + e.toString());
+		throw e;
+	  } 
   }
   
-  /**
-   * 
-   * @param routingContext
-   * GET all 
-   */
-  private void handleGetProduct(RoutingContext routingContext) {
-    String productID = routingContext.request().getParam("productID");
-    
-    HttpServerResponse response = routingContext.response();
-    if (productID == null) {
-      sendError(400, response);
-    } else {
-      JsonObject product = products.get(productID);
-      if (product == null) {
-        sendError(404, response);
-      } else {
-        response.putHeader("content-type", "application/json").end(product.encodePrettily());
-      }
-    }
+  private void handleImport(RoutingContext routingContext) {
+	  BodyHandler.create().setUploadsDirectory(workingDirectory);
+	  HttpServerResponse response = routingContext.response();
+	  String tableName = routingContext.request().getParam("tableName");
+	  
+	  Set<FileUpload> listFiles = routingContext.fileUploads();
+	  FileUpload file = listFiles.iterator().next();
+	 
+	  log("Filename: " + file.fileName() + "-" + file.uploadedFileName()+ "-" + file.name());
+	  log("Size: " + file.size());
+	  log("contentTransferEncoding: " + file.contentTransferEncoding());
+	  
+	  //JsonObject parsedToJson = new JsonObject(file.contentTransferEncoding());
+	  String filePath = workingDirectory + "/ressource/"+tableName+".json";
+	  
+	  
+	  File newTableFile = new File(filePath);
+	  
+	  // convert CSV to JSON
+	  if (newTableFile.exists()) {
+		  /**
+		   * #TODO: if table is existed => load the old file and update column by jsonBody
+		   */
+	  }
+	  else {
+		  /**
+		   * #TODO: else create new table and save in the /ressource/tableName
+		   */
+		  
+		  JsonArray getData;
+		  String fileJson = convertCSVToJson();
+		  if (fileJson != null) {
+			  try {
+				getData = loadJsonArrayFromFile(fileJson);
+				// first object of array will be the list of column 
+				formattedJson jsonObject = new formattedJson(getData.getJsonObject(0));
+				JsonObject jsonWithField = jsonObject.loadKey(tableName);
+				// add the data document
+				createFile(tableName, jsonWithField);
+				
+				response.end();
+			} catch (Exception e) {
+				e.printStackTrace();
+				sendError(400, response);
+			}  
+		  }
+	  }
+	  // log(parsedToJson.toString());
+	  // routingContext.response().end();
   }
   
-  /**
-   * 
-   * @param routingContext
-   * PUT 
-   */
   
-  private void handleAddProduct(RoutingContext routingContext) {
-    String productID = routingContext.request().getParam("productID");
-    HttpServerResponse response = routingContext.response();
-    if (productID == null) {
-      sendError(400, response);
-    } else {
-      JsonObject product = routingContext.getBodyAsJson();
-      if (product == null) {
-        sendError(400, response);
-      } else {
-        products.put(productID, product);
-        response.end();
-      }
-    }
-  }
   
-  /**
-   * 
-   * @param routingContext
-   * GET
-   */
-  private void handleListProducts(RoutingContext routingContext) {
-    JsonArray arr = new JsonArray();
-    products.forEach((k, v) -> arr.add(v));
-    routingContext.response().putHeader("content-type", "application/json").end(arr.encodePrettily());
-  }
+  // HELPERS
   /**
    * 
    * @param statusCode
@@ -249,17 +263,10 @@ private static String workingDirectory = System.getProperty("user.dir");
     response.setStatusCode(statusCode).end();
   }
   
-  /**
-   * 
-   */
+  private String convertCSVToJson() {
+	  String pathOfJSONfile = workingDirectory + "/ressource/test.json";
+	  return pathOfJSONfile;
+  }
+  private static void log(String string) { System.out.println(string); }
   
-  private void setUpInitialData() {
-    addProduct(new JsonObject().put("id", "prod3568").put("name", "Egg Whisk").put("price", 3.99).put("weight", 150));
-    addProduct(new JsonObject().put("id", "prod7340").put("name", "Tea Cosy").put("price", 5.99).put("weight", 100));
-    addProduct(new JsonObject().put("id", "prod8643").put("name", "Spatula").put("price", 1.00).put("weight", 80));
-  }
-
-  private void addProduct(JsonObject product) {
-    products.put(product.getString("id"), product);
-  }
 }

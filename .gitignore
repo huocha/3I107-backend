@@ -8,4 +8,7 @@
 
 /.mvn
 
-/ressource
+/ressource/.DS_Store
+/ressource/*.json
+
+/file-uploads
