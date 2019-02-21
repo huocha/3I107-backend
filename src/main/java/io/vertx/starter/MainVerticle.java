@@ -15,8 +15,6 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -74,7 +72,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  
 	  formattedJson js = new formattedJson(jsonResponse);
 	  
-	  JsonObject bodyJson = js.addIdToObject("field", tableName);
+	  JsonObject dataBody = js.addIdToObject("field", tableName);
 
 	  
 	  HttpServerResponse response = routingContext.response();
@@ -82,7 +80,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  
 	  // if table not exist => create one, otherwise return error
 	  if (tableName != null) {
-		  createFile(tableName);
+		  createFile(tableName, dataBody);
 	  }
 	  
 	  // #TODO: need to return a success or fail message
@@ -91,12 +89,12 @@ private static String workingDirectory = System.getProperty("user.dir");
   }
   
   
-  private void createFile(String tableName) {
+  private void createFile(String tableName, JsonObject dataBody) {
 	  // create new file in the path "/ressource/tableName.json" 
-	  String fileRepo = workingDirectory + "/ressource/"+tableName+".json";
-	  System.out.println("File repo = " + fileRepo);
+	  String filePath = workingDirectory + "/ressource/"+tableName+".json";
+	  System.out.println("File repo = " + filePath);
 	  
-	  File newTableFile = new File(fileRepo);
+	  File newTableFile = new File(filePath);
 		if (!newTableFile.exists()) {
 			try {
 				File directory = new File(newTableFile.getParent());
@@ -111,12 +109,12 @@ private static String workingDirectory = System.getProperty("user.dir");
 
 		try {
 			// Convenience class for writing character files
-			FileWriter crunchifyWriter;
-			crunchifyWriter = new FileWriter(newTableFile.getAbsoluteFile(), true);
+			FileWriter fileTable;
+			fileTable = new FileWriter(newTableFile.getAbsoluteFile(), true);
 
 			// Writes text to a character-output stream
-			BufferedWriter bufferWriter = new BufferedWriter(crunchifyWriter);
-			bufferWriter.write("hello world");
+			BufferedWriter bufferWriter = new BufferedWriter(fileTable);
+			bufferWriter.write(dataBody.toString());
 			bufferWriter.close();
 
 			
