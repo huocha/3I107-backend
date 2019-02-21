@@ -1,7 +1,12 @@
 package io.vertx.starter;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -18,12 +23,14 @@ import io.vertx.ext.web.handler.BodyHandler;
 
 /**
  * @author Jasmine 
- * last modified: 18/02/2019
+ * last modified: 21/02/2019
  */
 
 public class MainVerticle extends AbstractVerticle {
 	
 private Map<String, JsonObject> products = new HashMap<>();
+private static String workingDirectory = System.getProperty("user.dir"); 
+
   @Override
   public void start() throws Exception {
 	  // load data
@@ -48,26 +55,74 @@ private Map<String, JsonObject> products = new HashMap<>();
 	    	.requestHandler(router::accept).listen( 8080 );
   }
 
- 
+ /**
+  * 
+  * @param routingContext
+  * @data postData{
+  *  fields: [
+  *  	{ name: 'id', type: 'uuid' },
+  *  	{ name: 'fieldX', type: 'int' }, ...
+  *  ]	
+  * }
+  */
   private void createTable(RoutingContext routingContext) {
 	  String tableName = routingContext.request().getParam("tableName");
 	  
+	  JsonObject jsonResponse = routingContext.getBodyAsJson();
+	  
+	  // String uniqueID = UUID.randomUUID().toString();
+	  
+	  formattedJson js = new formattedJson(jsonResponse);
+	  
+	  JsonObject bodyJson = js.addIdToObject("field", tableName);
+
+	  
 	  HttpServerResponse response = routingContext.response();
+
 	  
 	  // if table not exist => create one, otherwise return error
 	  if (tableName != null) {
 		  createFile(tableName);
 	  }
 	  
-	  System.out.println(response);
+	  // #TODO: need to return a success or fail message
+	  response.end();
+
   }
-  
-  
   
   
   private void createFile(String tableName) {
 	  // create new file in the path "/ressource/tableName.json" 
+	  String fileRepo = workingDirectory + "/ressource/"+tableName+".json";
+	  System.out.println("File repo = " + fileRepo);
 	  
+	  File newTableFile = new File(fileRepo);
+		if (!newTableFile.exists()) {
+			try {
+				File directory = new File(newTableFile.getParent());
+				if (!directory.exists()) {
+					directory.mkdirs();
+				}
+				newTableFile.createNewFile();
+			} catch (IOException e) {
+				System.out.println("Excepton Occured: " + e.toString());
+			}
+		}
+
+		try {
+			// Convenience class for writing character files
+			FileWriter crunchifyWriter;
+			crunchifyWriter = new FileWriter(newTableFile.getAbsoluteFile(), true);
+
+			// Writes text to a character-output stream
+			BufferedWriter bufferWriter = new BufferedWriter(crunchifyWriter);
+			bufferWriter.write("hello world");
+			bufferWriter.close();
+
+			
+		} catch (IOException e) {
+			System.out.println("Excepton Occured: " + e.toString());
+		}
   }
   
 
@@ -83,6 +138,7 @@ private Map<String, JsonObject> products = new HashMap<>();
    */
   private void handleGetProduct(RoutingContext routingContext) {
     String productID = routingContext.request().getParam("productID");
+    
     HttpServerResponse response = routingContext.response();
     if (productID == null) {
       sendError(400, response);
