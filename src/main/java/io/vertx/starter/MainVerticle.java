@@ -200,6 +200,9 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  } 
   }
   
+  private void insert(JsonObject document) {
+	  
+  }
   private void handleImport(RoutingContext routingContext) {
 	  BodyHandler.create().setUploadsDirectory(workingDirectory);
 	  HttpServerResponse response = routingContext.response();
@@ -211,8 +214,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  log("Filename: " + file.fileName() + "-" + file.uploadedFileName()+ "-" + file.name());
 	  log("Size: " + file.size());
 	  log("contentTransferEncoding: " + file.contentTransferEncoding());
-	  
-	  //JsonObject parsedToJson = new JsonObject(file.contentTransferEncoding());
+
 	  String filePath = workingDirectory + "/ressource/"+tableName+".json";
 	  
 	  
@@ -238,6 +240,13 @@ private static String workingDirectory = System.getProperty("user.dir");
 				formattedJson jsonObject = new formattedJson(getData.getJsonObject(0));
 				JsonObject jsonWithField = jsonObject.loadKey(tableName);
 				// add the data document
+				JsonArray data = new JsonArray();
+				for (int i = 1; i < getData.size(); i++) {
+					data.add(getData.getJsonObject(i));
+				}
+				
+				jsonWithField.put("data", data);
+				
 				createFile(tableName, jsonWithField);
 				
 				response.end();
