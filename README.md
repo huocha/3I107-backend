@@ -10,9 +10,9 @@ donnée fine. Les fonctions SQL similaires sont le SELECT ... WHERE ... GROUP B
 ## API
 | Method | Route                      | Data(Example)
 | ------ | ---------------------------|------
-| PUT    | /table/:tableName          |```json { "fields": [{ "name": fieldX },{ "type": Int }]} ```
-| PUT    | /table/index/:tableName    |```json { "newIndex": "firstName"} ```
-| POST   | /table/insertOne/:tableName|```json { "data": [{ "name": "firstName", "value": "NGUYEN"}]} ```
+| PUT    | /table/:tableName          |``` { "fields": [{ "name": fieldX },{ "type": Int }]} ```
+| PUT    | /table/index/:tableName    |``` { "newIndex": "firstName"} ```
+| POST   | /table/insertOne/:tableName|``` { "data": [{ "name": "firstName", "value": "NGUYEN"}]} ```
 | GET    | /table/:tableName?query    | /table/:tableName?firstName=NGUYEN&lastName=Jasmine
 
 #TODO: GetQuery
