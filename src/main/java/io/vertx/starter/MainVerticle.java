@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,9 +31,9 @@ import io.vertx.ext.web.handler.BodyHandler;
  */
 
 public class MainVerticle extends AbstractVerticle {
-	
-private Map<String, JsonObject> products = new HashMap<>();
+
 private static String workingDirectory = System.getProperty("user.dir"); 
+private Map<String, Table> tables = new HashMap<>();
 
   @Override
   public void start() throws Exception {
@@ -44,8 +45,14 @@ private static String workingDirectory = System.getProperty("user.dir");
 	    // create a table (with postData in the body)
 	    router.put("/table/:tableName").handler(this::createTable);
 	    
+	    // create index (choose a column to index)
+	    router.put("/table/index/:tableName").handler(this::addIndexToTable);
+	    
+	    // #TODO: insertOne data to table
+	    router.post("/table/insertOne/:tableName/").handler(this::insert);
+	    
 	    // get a table existed, ?query=name="A"&age=21
-	    router.get("/table/:tableName").handler(this::getTable);
+	    router.get("/table/:tableName").handler(this::queryTable);
 	        
 	    // #TODO: upload one file each time, not consider the multi-file 
 	    router.post("/table/:tableName/importData").handler(this::handleImport);
@@ -65,14 +72,32 @@ private static String workingDirectory = System.getProperty("user.dir");
   *  ]	
   * }
   */
+  
   private void createTable(RoutingContext routingContext) {
 	  String tableName = routingContext.request().getParam("tableName");
+	  HttpServerResponse response = routingContext.response();
 	  
 	  JsonObject jsonResponse = routingContext.getBodyAsJson();
 	  
+	  ArrayList<Field> fields = new ArrayList<>();
+	  
+	  JsonArray arrayFields = jsonResponse.getJsonArray("fields");
+	  
+	  for(int i = 0; i < arrayFields.size(); i++) {
+		  JsonObject aField = arrayFields.getJsonObject(i);
+		  Field f = new Field(aField.getString("name"), aField.getString("type"));
+		  fields.add(f);
+	  }
+	  
+	  Table newTable = new Table(tableName, fields);
+	  tables.put(tableName, newTable);
+	  
+	  response.putHeader("content-type", "application/json").end();
+	  
 	  // String uniqueID = UUID.randomUUID().toString();
 	  
-	  formattedJson js = new formattedJson(jsonResponse);
+	  /*formattedJson js = new formattedJson(jsonResponse);
+	  
 	  
 	  JsonObject dataBody = js.addIdToObject("field", tableName);
 
@@ -84,11 +109,46 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  if (tableName != null) {
 		  createFile(tableName, dataBody);
 		  
-	  }
+	  }*/
 	  
 	  // #TODO: need to return a success or fail message
+  }
+  
+  private void addIndexToTable(RoutingContext routingContext) {
+	  String tableName = routingContext.request().getParam("tableName");
+	  HttpServerResponse response = routingContext.response();
+	  
+	  JsonObject jsonResponse = routingContext.getBodyAsJson();
+	  
+	  String indexColumn = jsonResponse.getString("newIndex");
+	  
+	  tables.get(tableName).addIndex(indexColumn);
 	  response.end();
+	  
+  }
+  
+  private void insert(RoutingContext routingContext) {
+	  String tableName = routingContext.request().getParam("tableName");
+	  HttpServerResponse response = routingContext.response();
+	  
+	  JsonObject jsonResponse = routingContext.getBodyAsJson();
+	  ArrayList<String> documents = new ArrayList<>();
+	  
+	  JsonArray arrayFields = jsonResponse.getJsonArray("data");
 
+	  for(int i = 0; i < arrayFields.size(); i++) {
+		  JsonObject aField = arrayFields.getJsonObject(i);	
+		  documents.add(aField.getString("value"));
+	  }
+	 
+	  Table tab = tables.get(tableName);
+	  
+	  tab.insertOne(documents);
+	  
+	  // tab.showData();
+	  
+	  response.end();
+	  
   }
   
   private void createFile(String tableName, JsonObject dataBody) {
@@ -123,6 +183,18 @@ private static String workingDirectory = System.getProperty("user.dir");
 		} catch (IOException e) {
 			log("Excepton Occured: " + e.toString());
 		}
+  }
+  
+  private void queryTable(RoutingContext routingContext) {
+	  String tableName = routingContext.request().getParam("tableName");
+	  Table tab = tables.get(tableName);
+	  // Map
+	  // Reduce
+	  String query = routingContext.request().query();
+	  HttpServerResponse response = routingContext.response();
+	  
+	  log(query);
+	  response.end();
   }
   
   private void getTable(RoutingContext routingContext) {
@@ -200,9 +272,6 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  } 
   }
   
-  private void insert(JsonObject document) {
-	  
-  }
   private void handleImport(RoutingContext routingContext) {
 	  BodyHandler.create().setUploadsDirectory(workingDirectory);
 	  HttpServerResponse response = routingContext.response();
@@ -232,7 +301,7 @@ private static String workingDirectory = System.getProperty("user.dir");
 		   */
 		  
 		  JsonArray getData;
-		  String fileJson = convertCSVToJson();
+		  String fileJson = convertCSVToJson(tableName);
 		  if (fileJson != null) {
 			  try {
 				getData = loadJsonArrayFromFile(fileJson);
@@ -260,8 +329,6 @@ private static String workingDirectory = System.getProperty("user.dir");
 	  // routingContext.response().end();
   }
   
-  
-  
   // HELPERS
   /**
    * 
@@ -272,10 +339,11 @@ private static String workingDirectory = System.getProperty("user.dir");
     response.setStatusCode(statusCode).end();
   }
   
-  private String convertCSVToJson() {
+  private String convertCSVToJson(String tableName) {
 	  String pathOfJSONfile = workingDirectory + "/ressource/test.json";
 	  return pathOfJSONfile;
   }
+  
   private static void log(String string) { System.out.println(string); }
   
 }

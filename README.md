@@ -7,6 +7,17 @@ Objectifs
 donnée fine. Les fonctions SQL similaires sont le SELECT ... WHERE ... GROUP BY
 3. Distribuer le dataset :​ Tournant sur 3 noeuds, développer le meilleur moyen de répartir la donnée
 
+## API
+| Method | Route                      | Data(Example)
+| ------ | ---------------------------|------
+| PUT    | /table/:tableName          |```json { "fields": [{ "name": fieldX },{ "type": Int }]} ```json
+| PUT    | /table/index/:tableName    |```json { "newIndex": "firstName"} ```json
+| POST   | /table/insertOne/:tableName|```json { "data": [{ "name": "firstName", "value": "NGUYEN"}]} ```json
+| GET    | /table/:tableName?query    | /table/:tableName?firstName=NGUYEN&lastName=Jasmine
+
+#TODO: GetQuery
+table needs to be sorted, MAP => REDUCE
+(Map by the key hashCode)
 ## Installation
 To launch your tests:
 ```
