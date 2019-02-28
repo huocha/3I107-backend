@@ -1,19 +1,17 @@
-package io.vertx.starter;
+package structure;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Table {
 	protected String tableName;
-	protected ArrayList<Field> fields;
+	protected ArrayList<Column> columns;
 	protected Index index;
-	protected ArrayList<Data> listData = new ArrayList<Data>();
+	protected ArrayList<Row> listData = new ArrayList<Row>();
 	
 	public Table() {}
-	public Table(String tableName, ArrayList<Field> fields) {
+	public Table(String tableName, ArrayList<Column> columns) {
 		this.tableName = tableName;
-		this.fields = fields; 
+		this.columns = columns; 
 		this.listData = listData;
 	}
 	
@@ -26,21 +24,21 @@ public class Table {
 	}
 	
 	public void addIndex(String columnName) {
-		for(Field f : fields) {
+		for(Column f : columns) {
 			if (f.getName().equals(columnName)) {
 				f.setIndex();
 			}
 		}
 	}
 	
-	public ArrayList<Field> getFields() {
-		return this.fields;
+	public ArrayList<Column> getFields() {
+		return this.columns;
 	}
 	
 	public int getPositionIndex() {
 		int pos = 0;
-		for(Field f : fields) {
-			if (f.isIndex()) { pos = fields.indexOf(f); return pos;}
+		for(Column f : columns) {
+			if (f.isIndex()) { pos = columns.indexOf(f); return pos;}
 		}
 		return pos;
 	}
@@ -50,13 +48,13 @@ public class Table {
 		
 		Index index = new Index(documents.get(position));
 		
-		Data newRow = new Data(index, documents);
+		Row newRow = new Row(index, documents);
 			
 		this.listData.add(newRow);
 	}
 	
 	public void showData() {
-		for(Data d: listData) {
+		for(Row d: listData) {
 			System.out.println(d.getKey().toString()+ " - " + d.getValue());
 		}
 	}
