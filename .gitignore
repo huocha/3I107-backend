@@ -1,6 +1,6 @@
 /target/
 
-/.DS_Store
+.DS_Store
 
 /User
 
@@ -8,7 +8,6 @@
 
 /.mvn
 
-/ressource/.DS_Store
 /ressource/*.json
 
 /file-uploads
