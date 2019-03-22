@@ -1,4 +1,4 @@
-package structure;
+package io.vertx.structure;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

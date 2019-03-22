@@ -1,4 +1,4 @@
-package structure;
+package io.vertx.structure;
 
 import java.util.ArrayList;
 import java.util.HashMap;

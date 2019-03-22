@@ -1,27 +1,25 @@
-package main;
+package io.vertx.main;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.vertx.core.AbstractVerticle;
-
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import structure.Column;
-import structure.Table;
-import utils.Helpers;
-
+import io.vertx.structure.Column;
+import io.vertx.structure.Table;
+import io.vertx.utils.Console;
 /**
  * @author Jasmine 
  * last modified: 28/02/2019
  */
 
-public class Main extends AbstractVerticle {
+public class MainVerticle extends AbstractVerticle {
 
 private static String workingDirectory = System.getProperty("user.dir"); 
 private Map<String, Table> tables = new HashMap<>();
@@ -34,17 +32,19 @@ private Map<String, Table> tables = new HashMap<>();
 	    
 	    router.route().handler(BodyHandler.create());
 	    // create a table (with postData in the body)
-	    router.put("/table/:tableName").handler(this::createTable);
+	    router.put("/table/:tableName/").handler(this::createTable);
 	    
 	    // create index (choose a column to index)
-	    router.put("/table/index/:tableName").handler(this::addIndexToTable);
+	    router.put("/table/index/:tableName/").handler(this::addIndexToTable);
 	    
 	    // #TODO: insertOne data to table
 	    router.post("/table/insertOne/:tableName/").handler(this::insert);
 	    
 	    // get a table existed, ?query=name="A"&age=21
-	    router.get("/table/:tableName").handler(this::queryTable);
-	   
+	    router.get("/table/:tableName/").handler(this::queryTable);
+	    
+	    router.get("/test/").handler(this::test);
+	    
 		    
 	    vertx
 	    	.createHttpServer()
@@ -61,6 +61,12 @@ private Map<String, Table> tables = new HashMap<>();
   *  ]	
   * }
   */
+  
+  private void test(RoutingContext routingContext) {
+	  routingContext.response()
+      .putHeader("content-type", "text/plain")
+      .end("Hello from Vert.x!");
+  }
   
   private void createTable(RoutingContext routingContext) {
 	  String tableName = routingContext.request().getParam("tableName");
@@ -130,7 +136,7 @@ private Map<String, Table> tables = new HashMap<>();
 	  String query = routingContext.request().query();
 	  HttpServerResponse response = routingContext.response();
 	  
-	  Helpers.log(query);
+	  Console.log(query);
 	  response.end();
   }
   

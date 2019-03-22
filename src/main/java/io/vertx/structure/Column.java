@@ -1,4 +1,4 @@
-package structure;
+package io.vertx.structure;
 
 // Each column has a name, type and can be indexed or not
 public class Column {
