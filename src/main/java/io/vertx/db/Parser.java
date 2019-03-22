@@ -31,20 +31,20 @@ public class Parser {
         Scanner scanner = new Scanner(file);
         
         String[] firstLine = scanner.nextLine().split(DEFAULT_SEPARATOR); // firstLine is name of columns 
+      
         
         for(String str: firstLine) {
-        	Column newColumn = new Column(str);
+        	Column newColumn = new Column(str.toLowerCase().trim());
         	columns.add(newColumn);
         }
         
         while (scanner.hasNext()) {
             Row line = parseLine(scanner.nextLine());
-            rows.add(line);
+            if(line != null) { rows.add(line); }
         }
         
+        table.addColumns(columns);
         table.insertMany(rows);
-        
-        // end test
         
         scanner.close();
         
@@ -64,11 +64,16 @@ public class Parser {
     	
     	ArrayList<String> line = new ArrayList(Arrays.asList(cvsLine.split(separators)));
     	
-    	Index key = new Index(line.get(0));
+    	if( line != null && line.size() >= 1 ) {
+    		Index key = new Index(line.get(0));
+        	
+        	Row newRow = new Row(key, line);
+        	
+            return newRow;	
+    	}
     	
-    	Row newRow = new Row(key, line);
+    	return null;
     	
-        return newRow;
     }
 
 }

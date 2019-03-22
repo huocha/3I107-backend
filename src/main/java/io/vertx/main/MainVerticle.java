@@ -39,7 +39,7 @@ private Table table = new Table();
 	    // #TODO: insertOne data to table
 	    router.post("/table/insertOne/:tableName/").handler(this::insert);
 	    
-	    // get a table existed, ?query=name="A"&age=21
+	    // get a table existed, ?name="A"&age=21
 	    router.get("/table/:tableName/").handler(this::queryTable);
 	    
 	    router.get("/test/").handler(this::test);
@@ -60,7 +60,9 @@ private Table table = new Table();
   *  ]	
   * }
   */
-  
+  /**
+   * Load table at the beginning
+   */
   private void init() {
 	  try {
 		table = Parser.parse();
@@ -69,8 +71,16 @@ private Table table = new Table();
 	  }
 		  
   }
+  
   private void test(RoutingContext routingContext) {
-	 table.showData();
+	 Console.log("Count: "+ table.count());
+	 
+	 Console.log(table.getFields().toString());
+	 
+	 String query = routingContext.request().query();
+	 
+	 Console.log(query);
+	 
 	  routingContext.response()
       .putHeader("content-type", "text/plain")
       .end("Hello from Vert.x!");

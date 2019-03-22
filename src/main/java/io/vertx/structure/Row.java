@@ -18,7 +18,9 @@ public class Row {
 		this.data.put(key,values);
 	}
 	
-	
+	public Map<Index, ArrayList<String>> getRow(){
+		return data;
+	}
 	public Index getKey() {
 		return this.key;
 	}

@@ -1,10 +1,11 @@
 package io.vertx.structure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Table {
 	protected String tableName;
-	protected ArrayList<Column> columns = new ArrayList<Column>();
+	public ArrayList<Column> columns = new ArrayList<Column>();
 	protected Index index;
 	protected ArrayList<Row> listData = new ArrayList<Row>();
 	
@@ -47,7 +48,15 @@ public class Table {
 		}
 	}
 	
-	public void showData() {
+	public int count() {
+		return this.listData.size();
+	}
+	
+	public void query(HashMap<String, String> query) {
+		
+	}
+	
+	public void log() {
 		for(Row d: listData) {
 			System.out.println(d.getKey().toString()+ " - " + d.getValue());
 		}
