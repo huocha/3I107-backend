@@ -70,11 +70,6 @@
 			<version>${junit-platform-launcher.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-    		<groupId>org.simpleflatmapper</groupId>
-    		<artifactId>sfm-csv</artifactId>
-    		<version>6.5.0</version>
-		</dependency>
 	</dependencies>
 
 	<build>

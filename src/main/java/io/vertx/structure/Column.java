@@ -6,7 +6,10 @@ public class Column {
 	protected String type;
 	protected Boolean isIndex;
 
-	public Column() {}
+	public Column(String name) {
+		this.name = name;
+	}
+	
 	public Column(String name, String type) {
 		this.name = name;
 		this.type = type;

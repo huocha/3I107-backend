@@ -1,4 +1,4 @@
-_id,sqlId,type,created,name,description,discount
-ObjectId("5b5ecf04b0cd4074284fe5cf"),7d128ffc-43a6-45f9-891a-aac3935d298e,group,""2018-07-30T08:40:36.015Z"",Volume Discount,.25 cents off,"{"type":"rate","value":0.25}"
-ObjectId("5b5ecf04b0cd4074284fe5d0"),e509e9f1-4a7d-47b3-9ccf-cab4a2074cda,group,""2018-07-30T08:40:36.015Z"",Academic Discount,.25 cents off,"{"type":"rate","value":0.25}"
-ObjectId("5b5ecf04b0cd4074284fe5d1"),59db2f7d-1deb-4799-b583-e5fab955e0c6,group,""2018-07-30T08:40:36.015Z"",KS&R,,"{"type":"rate","value":0.25}"
+Player Name,Position,Nicknames,Years Active
+Skippy Peterson,First Base,"""Blue Dog"", ""The Magician""",1908-1913
+Bud Grimsby,Center Field,"""The Reaper"", ""Longneck""",1910-1917
+Vic Crumb,Shortstop,"""Fat Vic"", ""Icy Hot""",1911-1912

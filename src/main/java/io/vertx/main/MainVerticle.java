@@ -8,6 +8,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.db.Parser;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -23,9 +24,10 @@ public class MainVerticle extends AbstractVerticle {
 
 private static String workingDirectory = System.getProperty("user.dir"); 
 private Map<String, Table> tables = new HashMap<>();
-
+private Table table = new Table();
   @Override
   public void start() throws Exception {
+	  init();
 	  
 	  // initialiser les routes
 	  Router router = Router.router(vertx);
@@ -33,9 +35,6 @@ private Map<String, Table> tables = new HashMap<>();
 	    router.route().handler(BodyHandler.create());
 	    // create a table (with postData in the body)
 	    router.put("/table/:tableName/").handler(this::createTable);
-	    
-	    // create index (choose a column to index)
-	    router.put("/table/index/:tableName/").handler(this::addIndexToTable);
 	    
 	    // #TODO: insertOne data to table
 	    router.post("/table/insertOne/:tableName/").handler(this::insert);
@@ -62,7 +61,16 @@ private Map<String, Table> tables = new HashMap<>();
   * }
   */
   
+  private void init() {
+	  try {
+		table = Parser.parse();
+	  } catch (Exception e) {
+		Console.error(e);
+	  }
+		  
+  }
   private void test(RoutingContext routingContext) {
+	 table.showData();
 	  routingContext.response()
       .putHeader("content-type", "text/plain")
       .end("Hello from Vert.x!");
@@ -91,18 +99,6 @@ private Map<String, Table> tables = new HashMap<>();
 
   }
   
-  private void addIndexToTable(RoutingContext routingContext) {
-	  String tableName = routingContext.request().getParam("tableName");
-	  HttpServerResponse response = routingContext.response();
-	  
-	  JsonObject jsonResponse = routingContext.getBodyAsJson();
-	  
-	  String indexColumn = jsonResponse.getString("newIndex");
-	  
-	  tables.get(tableName).addIndex(indexColumn);
-	  response.end();
-	  
-  }
   
   private void insert(RoutingContext routingContext) {
 	  String tableName = routingContext.request().getParam("tableName");
@@ -120,7 +116,6 @@ private Map<String, Table> tables = new HashMap<>();
 	 
 	  Table tab = tables.get(tableName);
 	  
-	  tab.insertOne(documents);
 	  
 	  // tab.showData();
 	  
