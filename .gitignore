@@ -8,7 +8,6 @@
 
 /.mvn
 
-/ressource/*.json
-/ressource/*.csv
+/src/ressource/*.csv
 
 /file-uploads
