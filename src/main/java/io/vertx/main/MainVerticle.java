@@ -1,5 +1,8 @@
 package io.vertx.main;
 
+import java.io.IOException;
+import java.util.List;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -16,7 +19,7 @@ import io.vertx.utils.Console;
  */
 
 public class MainVerticle extends AbstractVerticle {
-	private Table table = new Table();
+	private Table table;
 	
 	@Override
 	public void start() throws Exception {
@@ -38,7 +41,14 @@ public class MainVerticle extends AbstractVerticle {
 	    // get a table existed, ?name="A"&age=21
 	    router.get("/table/:tableName/").handler(this::queryTable);
 	    
-	    router.get("/test/").blockingHandler(this::test);
+	    router.get("/test/").blockingHandler(event -> {
+			try {
+				test(event);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	    
 		    
 	    vertx
@@ -47,6 +57,7 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void init() {
+	  table=new Table();
 	  try {
 			Parser parser = new Parser(table);
 			parser.parse();
@@ -57,11 +68,11 @@ public class MainVerticle extends AbstractVerticle {
 		  
   }
   
-  private void test(RoutingContext routingContext) {
+  private void test(RoutingContext routingContext) throws IOException {
 	  init();
-	  Console.log("Count: "+ table.count());
-	 
-	  // Console.log(table.getColumns().toString());
+	  Console.log("CMT:"+table.getIndexes().get(0).getIndexCol().get(0).getIndex().get("CMT").size());
+	  //Console.log("Count: "+ table.count());
+	  
 	 
 	  String query = routingContext.request().query();
 	 
