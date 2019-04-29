@@ -11,3 +11,8 @@
 /src/ressource/*.csv
 
 /file-uploads
+
+
+### nicolas ###
+.idea
+.vscode
