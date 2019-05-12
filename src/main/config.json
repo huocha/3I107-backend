@@ -1,0 +1,7 @@
+{
+  "currentPort": 8080,
+	"siblings": {
+		"first": 8081,
+		"second": 8082
+	}
+}
