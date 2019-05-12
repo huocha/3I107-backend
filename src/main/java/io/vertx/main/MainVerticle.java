@@ -12,6 +12,7 @@ import io.vertx.utils.Console;
 public class MainVerticle extends AbstractVerticle {
 	private String[] otherPorts;
 	private int port;
+	public JsonObject data = new JsonObject();
 	public void start() {
 		otherPorts = this.context.config().getString("http.otherPorts").split(",");
 		port = this.context.config().getInteger("http.port", 8080);
@@ -19,6 +20,7 @@ public class MainVerticle extends AbstractVerticle {
 		Router router = Router.router(vertx);
 		router.get("/test/").handler(this::test);
 		router.post("/postData/").handler(this::sendData);
+		data.put("first", Math.random());
 		
 		vertx.createHttpServer()
 			.requestHandler(router::accept)
@@ -43,23 +45,25 @@ public class MainVerticle extends AbstractVerticle {
 			  Console.log("Received response with status code " + res.statusCode());
 			  res.bodyHandler(bodyHandler -> {
 				  JsonObject body = bodyHandler.toJsonObject();
-				  Console.log(body.toString());
+				  Console.log("res: " + body.getDouble("first"));
+				  data.put("second", body.getDouble("first"));
 			  });
 		}).end();
     }
 	
 	private void test(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
-		response.end("Hello world !");
+		response.end("Data " + data);
 	}
 	
 	private void sendData(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
-		JsonObject toReturn = new JsonObject();
 		
-		toReturn.put("to", port);
-		toReturn.put("from", otherPorts[0]);
-		response.end(toReturn.encodePrettily());
+		/*toReturn.put("from", port);
+		toReturn.put("to", otherPorts[0]);
+		*/
+	
+		response.end(data.encodePrettily());
 	}
 
 }
