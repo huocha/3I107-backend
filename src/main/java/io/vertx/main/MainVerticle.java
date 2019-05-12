@@ -1,7 +1,6 @@
 package io.vertx.main;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -12,7 +11,9 @@ public class MainVerticle extends AbstractVerticle {
 	public void start() {
 		Router router = Router.router(vertx);
 		router.get("/test/").handler(this::test);	
-	   
+		
+		Console.log(this.context.config().getString("http.otherPorts"));
+		
 		vertx.createHttpServer()
 			.requestHandler(router::accept)
 			.listen(

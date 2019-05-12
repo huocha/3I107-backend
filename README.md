@@ -35,13 +35,10 @@ To run your application:
 ```
 
 ## Run configuration
-> main > main class
+Everything is passed in the redeploy.bat
+To change current port and other sibling-ports
 ```
-io.vertx.core.Starter
-```
-> arguments > program arguments
-```
-run io.vertx.starter.MainVerticle
+-Dport=8081 -Dother=8082,8083
 ```
 
 ## Usage pricipal
