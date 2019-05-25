@@ -18,12 +18,22 @@ public class Parser {
 
 	private static final String DEFAULT_SEPARATOR = ",";
 	private static final String DEFAULT_QUOTE = "'";
+	private int numPort;
 
 	private static String workingDirectory = System.getProperty("user.dir");
-	private static String dataFileName = "/src/ressource/rawTest.csv"; //file source
-	private static String dataFileSearch = "/src/ressource/rawTest.txt"; //new file to be searched data
+	private static String dataFileName = "/ressource/raw1.csv"; //file source
+	private static String dataFileSearch = "/ressource/"; //new file to be searched data
 
-	protected static Table table = new Table();
+	protected  Table table;
+
+	public Table getTable() {
+		return table;
+	}
+
+	public void setTable(Table table) {
+		this.table = table;
+	}
+
 
 	protected static ArrayList<IndexColumn> columns = new ArrayList<IndexColumn>();
 
@@ -31,7 +41,11 @@ public class Parser {
 	//protected static IndexColumn indexCol = new IndexColumn();
 	protected static Index newIndex = new Index();
 
-	public Parser(Table table) { this.table = table; }
+	public Parser(int port) { 
+		this.table = new Table(); this.numPort=port%10;
+		this.dataFileSearch=this.dataFileSearch+"rawTest"+this.numPort+".txt";
+		
+		}
 	
 	public static String getDataFileSearch() {
 		return dataFileSearch;
@@ -56,7 +70,7 @@ public class Parser {
 		
 	}
 	
-    public void parse() throws Exception {
+    public void parse(int numColumnToIndex) throws Exception {
 
         Scanner scanner = new Scanner(file);
 
@@ -64,11 +78,12 @@ public class Parser {
 
         scanner.nextLine();//pass the line with ","
 
-        IndexColumn firstColumn = new IndexColumn(0); // IndexColumn by the first column->numero 0 , ie: vendor_name
+        //IndexColumn firstColumn = new IndexColumn(0); // IndexColumn by the first column->numero 0 , ie: vendor_name
+        IndexColumn firstColumn = new IndexColumn(numColumnToIndex); //IndexColumn by the numero : numColumnToIndex column->numero 0 , ie: vendor_name
         Index indexFirstColumn = new Index();
         indexFirstColumn.insert(firstColumn);
 
-        File fileSearch = new File(workingDirectory+dataFileSearch);
+        File fileSearch = new File(workingDirectory+this.getDataFileSearch());
         boolean fileIsExisted = fileSearch.exists(); //check if the file research existe?
         PrintWriter  pw=  null;
 
@@ -78,17 +93,22 @@ public class Parser {
         }
 
         try {
+        	int numLigne=0;
         	while (scanner.hasNext()) {
+        		numLigne=(numLigne%3) +1;
         		String thisLine = scanner.nextLine();
-
-        		if (!fileIsExisted) pw.println(thisLine); //write new file
-
-        		parseLine(thisLine, indexFirstColumn.getIndexCol().get(0));
+        		if (numLigne==this.numPort) { //numero line correspond numero port
+	        		
+	
+	        		if (!fileIsExisted) pw.println(thisLine); //write new file
+	
+	        		parseLine(thisLine, indexFirstColumn.getIndexCol().get(0));
+        		}
 
             }
         }
         catch(Exception e){ Console.error(e); }
-        finally { pw.close(); }
+        finally { if (pw!=null) pw.close(); }
 
         table.insert(indexFirstColumn); // add index which contain indexColumn of vendor_name to table for ex
 

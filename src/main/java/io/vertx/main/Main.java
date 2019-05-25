@@ -18,7 +18,7 @@ public class Main {
 		JsonObject config = new JsonObject();
 		config.put("http.port", Integer.parseInt(currentPort));
 		config.put("http.otherPorts", otherPorts);
-		
+		Console.log("testing");
 		DeploymentOptions options = new DeploymentOptions().setConfig(config);
 		
         vertx.deployVerticle(MainVerticle.class, options);
