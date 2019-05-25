@@ -9,7 +9,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.utils.Console;
 
-public class MainVerticle extends AbstractVerticle {
+public class MainHttpServer extends AbstractVerticle {
 	private String[] otherPorts;
 	private int port;
 	public JsonObject data = new JsonObject();
@@ -34,35 +34,17 @@ public class MainVerticle extends AbstractVerticle {
 	          }
 	      );
 		
-		HttpClient client = vertx.createHttpClient();
 		
-		RequestOptions options = new RequestOptions();
-		options.setPort(Integer.parseInt(otherPorts[0]));
-		options.setURI("/postData");
-	
-		client.post(options, res -> {
-
-			  Console.log("Received response with status code " + res.statusCode());
-			  res.bodyHandler(bodyHandler -> {
-				  JsonObject body = bodyHandler.toJsonObject();
-				  Console.log("res: " + body.getDouble("first"));
-				  data.put("second", body.getDouble("first"));
-			  });
-		}).end();
     }
 	
 	private void test(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
-		response.end("Data " + data);
+		response.end("Hello world !!!");
 	}
 	
 	private void sendData(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
 		
-		/*toReturn.put("from", port);
-		toReturn.put("to", otherPorts[0]);
-		*/
-	
 		response.end(data.encodePrettily());
 	}
 

@@ -8,4 +8,4 @@ SET CMD_LINE_ARGS=%*
 
 call mvn compile dependency:copy-dependencies
 
-java -cp  "target\dependency\*;target\classes" %LAUNCHER% %VERTX_CMD% --redeploy="src\main\**\*" --on-redeploy=%CMD% --launcher-class=io.vertx.main.Main --java-opts="-Dport=8081 -Dother=8082,8083"
+java -cp  "target\dependency\*;target\classes" %LAUNCHER% %VERTX_CMD% --redeploy="src\main\**\*" --on-redeploy=%CMD% --launcher-class=io.vertx.main.MainHttpClient --java-opts="-Dport=8082 -Dother=8081,8083"
