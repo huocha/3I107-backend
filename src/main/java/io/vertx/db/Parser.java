@@ -21,7 +21,7 @@ public class Parser {
 	private int numPort;
 
 	private static String workingDirectory = System.getProperty("user.dir");
-	private static String dataFileName = "/ressource/raw1.csv"; //file source
+	private static String dataFileName = "/ressource/rawTest.csv"; //file source
 	private static String dataFileSearch = "/ressource/"; //new file to be searched data
 
 	protected  Table table;

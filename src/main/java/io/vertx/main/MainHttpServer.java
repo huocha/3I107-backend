@@ -10,7 +10,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.utils.Console;
 
-public class MainVerticle extends AbstractVerticle {
+public class MainHttpServer extends AbstractVerticle {
 	private String[] otherPorts;
 	private int port;
 	public JsonObject data = new JsonObject();
@@ -22,11 +22,12 @@ public class MainVerticle extends AbstractVerticle {
 		Parser parser=new Parser(port);//create a parser for the actual port
 		parser.parse(0); //suppose index by the column 0 -> vendor_name
 		//par ex :
-		int result_DDS=parser.getTable().getIndexes().get(0).getIndexCol().get(0).get("VTS").size();
+		int result_VTS=parser.getTable().getIndexes().get(0).getIndexCol().get(0).get("VTS").size();
+		data.put("result", result_VTS);
+		
 		Router router = Router.router(vertx);
 		router.get("/test/").handler(this::test);
 		router.post("/postData/").handler(this::sendData);
-		data.put("first", result_DDS);
 		
 		vertx.createHttpServer()
 			.requestHandler(router::accept)
@@ -41,35 +42,17 @@ public class MainVerticle extends AbstractVerticle {
 	          }
 	      );
 		
-		HttpClient client = vertx.createHttpClient();
 		
-		RequestOptions options = new RequestOptions();
-		options.setPort(Integer.parseInt(otherPorts[0]));
-		options.setURI("/postData");
-	
-		client.post(options, res -> {
-
-			  Console.log("Received response with status code " + res.statusCode());
-			  res.bodyHandler(bodyHandler -> {
-				  JsonObject body = bodyHandler.toJsonObject();
-				  Console.log("res: " + body.getDouble("first"));
-				  data.put("second", body.getDouble("first"));
-			  });
-		}).end();
     }
 	
 	private void test(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
-		response.end("Data " + data);
+		response.end(data.encode());
 	}
 	
 	private void sendData(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
 		
-		/*toReturn.put("from", port);
-		toReturn.put("to", otherPorts[0]);
-		*/
-	
 		response.end(data.encodePrettily());
 	}
 
