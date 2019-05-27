@@ -30,8 +30,6 @@ public class MainHttpServer extends AbstractVerticle {
 		router.get("/getFromOtherPorts/").handler(this::getFromOtherPorts);
 		router.get("/get/").handler(this::get);
 		
-		router.post("/postData/").handler(this::sendData);
-		
 		vertx.createHttpServer()
 			.requestHandler(router::accept)
 			.listen(port,
@@ -156,10 +154,4 @@ public class MainHttpServer extends AbstractVerticle {
 		
 	}
 	
-	private void sendData(RoutingContext routingContext) {
-		HttpServerResponse response = routingContext.response();
-		
-		response.end();
-	}
-
 }
