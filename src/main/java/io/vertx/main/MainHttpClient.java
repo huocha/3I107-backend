@@ -35,43 +35,7 @@ public class MainHttpClient {
 		DeploymentOptions options = new DeploymentOptions().setConfig(config);
 		
 		setTimeout(() -> vertx.deployVerticle(MainHttpServer.class, options), 2000);
-		
-		/**
-		 * Send client request to other server in order to get data // inner communication
-		 */
-		
-		HttpClientOptions requestOptions = new HttpClientOptions()
-				.setDefaultHost("localhost")
-				.setDefaultPort(Integer.parseInt(otherPorts[0]))
-				.setLogActivity(true);
-		
-		HttpClient client = vertx.createHttpClient(requestOptions);
-		
-		/**
-		 * Simple request without body 
-		 */
-		
-		client.request(HttpMethod.GET, "/getFromOtherPorts", response -> {
-			System.out.println("Received response with status code " + response.statusCode());
-			
-			response.bodyHandler(body -> Console.log("GET " +body.toString("ISO-8859-1")));
-		}).end();
-		
-		
-		/**
-		 * Request with body
-		 */
-		
-		HttpClientRequest request = client.request(HttpMethod.POST, "/postData", response -> {
-			Console.log("Received response with status code " + response.statusCode());
-			
-			response.bodyHandler(body -> Console.log("GET " + body.toString("ISO-8859-1")));
-		});
-		
-		request.putHeader("content-length", "12")
-		       .putHeader("content-type", "application/json")
-		       .write("Send http request from "+currentPort)
-		       .end();
+	
         
 	}
 	

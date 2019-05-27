@@ -8,12 +8,9 @@ donnée fine. Les fonctions SQL similaires sont le SELECT ... WHERE ... GROUP B
 3. Distribuer le dataset :​ Tournant sur 3 noeuds, développer le meilleur moyen de répartir la donnée
 
 ## API
-| Method | Route                      | Data(Example)
-| ------ | ---------------------------|------
-| PUT    | /table/:tableName          |``` { "fields": [{ "name": fieldX },{ "type": Int }]} ```
-| PUT    | /table/index/:tableName    |``` { "newIndex": "firstName"} ```
-| POST   | /table/insertOne/:tableName|``` { "data": [{ "name": "firstName", "value": "NGUYEN"}]} ```
-| GET    | /table/:tableName?query    | /table/:tableName?firstName=NGUYEN&lastName=Jasmine
+| Method | Route                      						| Data(Example)
+| ------ | ---------------------------------------|-----------------------
+| GET    | /get?select=name_col&where=conditions  | /get?select=vendor_name,trip_date&where=vendor_name=VTS
 
 #TODO: GetQuery
 table needs to be sorted, MAP => REDUCE
@@ -45,11 +42,11 @@ To change current port and other sibling-ports
 Grandes étapes
 - [ ] 1. Développer l’API REST
 Définir une API REST standard permettant d’effectuer les 4 opérations ci-dessus.
-- [ ] 2. Ajouter le support des tables / index
+- [x] 2. Ajouter le support des tables / index
 La structure interne restera simple (HashMap, ...) mais permettra d’obtenir des premiers résultats probants sur une faible volumétrie.
-- [ ] 3. Charger de la données
+- [x] 3. Charger de la données
 Réaliser le parsing du CSV et l’ingestion des lignes dans les index d’une table
-- [ ] 4. Distribuer le serveur
+- [x] 4. Distribuer le serveur
 Être capable de faire communiquer les noeuds. Lorsqu’une action s’effectue sur un noeud, elle est répercutée sur les autres. Chaque noeud connaît les tables, index ... LEs notions de tolérance aux pannes et réplication ne sont pas l’objectif du projet.
 - [ ] 5. Rendre le programme performant
 - Être capable d’avoir le plus de lignes en mémoire disponible

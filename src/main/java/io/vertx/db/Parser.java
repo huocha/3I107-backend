@@ -2,7 +2,6 @@ package io.vertx.db;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 
 import io.vertx.structure.Index;
 import io.vertx.structure.IndexColumn;
@@ -44,8 +43,7 @@ public class Parser {
 	public Parser(int port) { 
 		this.table = new Table(); this.numPort=port%10;
 		this.dataFileSearch=this.dataFileSearch+"rawTest"+this.numPort+".txt";
-		
-		}
+	}
 	
 	public static String getDataFileSearch() {
 		return dataFileSearch;
@@ -131,29 +129,5 @@ public class Parser {
     		indexColumn.insert(line);
     	}
     }
-    /*
-    public static Index parseLine(String cvsLine,  int numColumn) {
-        return parseLine(cvsLine, DEFAULT_SEPARATOR, DEFAULT_QUOTE, numColumn);
-    }
-
-    public static Index parseLine(String cvsLine, String separators, int numColumn) {
-        return parseLine(cvsLine, separators, DEFAULT_QUOTE, numColumn);
-    }
-
-    public static Index parseLine(String cvsLine, String separators, String customQuote,  int numColumn) {
-
-    	List<String> line = Arrays.asList(cvsLine.split(separators));
-
-    	if( line != null && line.size() >= 1 ) {
-
-    		indexCol.insert(line);
-    		newIndex.insert(indexCol);
-
-            return newIndex;
-    	}
-
-    	return null;
-
-    }*/
 
 }
