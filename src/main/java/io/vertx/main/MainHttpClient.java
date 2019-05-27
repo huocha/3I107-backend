@@ -51,7 +51,7 @@ public class MainHttpClient {
 		 * Simple request without body 
 		 */
 		
-		client.request(HttpMethod.GET, "/test", response -> {
+		client.request(HttpMethod.GET, "/getFromOtherPorts", response -> {
 			System.out.println("Received response with status code " + response.statusCode());
 			
 			response.bodyHandler(body -> Console.log("GET " +body.toString("ISO-8859-1")));

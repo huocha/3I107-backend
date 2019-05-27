@@ -10,4 +10,9 @@
 
 /src/ressource/*.csv
 
+/ressource/*.csv
+
+
+/ressource/*.txt
+
 /file-uploads
