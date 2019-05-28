@@ -18,12 +18,12 @@ public class Query {
 	public HashMap<Integer, String> parseQuery() {
 		String[] allConditions = this.where.split(",");
 		HashMap<Integer, String> result = new HashMap<Integer, String>();
-		
+
 		for( String condition: allConditions) {
 			String key = condition.split("=")[0];
 			int index = Arrays.asList(allCol).indexOf(key.toUpperCase());
-			Console.log("index"+index);
-			if(index !=1) {
+
+			if(index !=-1) {
 				result.put(index, condition.split("=")[1]);
 			}
 		}
