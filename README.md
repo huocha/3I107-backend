@@ -1,4 +1,4 @@
-# 3I107-backend
+# Moteur d'indexation
 
 ## Description
 Objectifs
@@ -10,7 +10,7 @@ donnée fine. Les fonctions SQL similaires sont le SELECT ... WHERE ... GROUP B
 ## API
 | Method | Route                      						| Data(Example)
 | ------ | ---------------------------------------|-----------------------
-| GET    | /get?select=name_col&where=conditions  | /get?select=vendor_name,trip_date&where=vendor_name=VTS
+| GET    | /get?select=name_col&where=conditions  | /get?select=vendor_name,trip_date&where=vendor_name=VTS,payment_type=cash
 
 #TODO: GetQuery
 table needs to be sorted, MAP => REDUCE
@@ -21,6 +21,10 @@ To launch your tests:
 ./mvnw clean test
 ```
 
+To launch in redeploy mode: 
+```
+redeploy.bat
+```
 To package your application:
 ```
 ./mvnw clean package
