@@ -25,6 +25,24 @@ public class MainHttpServer extends AbstractVerticle {
 		
 		parser = new Parser(port);
 		
+		vertx.executeBlocking(future -> {
+
+			// Do the blocking operation in here
+			try { parser.parse(0); } 
+			catch (Exception ignore) { }
+			
+			future.complete("finish parser");
+        
+		}, res -> {
+
+			if (res.succeeded()) {
+				Console.log(res.result().toString());
+			} else {
+				res.cause().printStackTrace();
+			}
+        
+		});
+		
 		Router router = Router.router(vertx);
 		router.get("/getFromCurrentPort/").handler(this::getFromCurrentPort);
 		router.get("/getFromOtherPorts/").handler(this::getFromOtherPorts);
@@ -52,8 +70,8 @@ public class MainHttpServer extends AbstractVerticle {
 	    Console.log("select : " +select);
 	    Console.log("where : " +where);
 	    
-	    String [] selects = select.split(",");
-	    String [] wheres = where.split(",");
+	    //String [] selects = select != null ? select.split(",") : null;
+	    //String [] wheres = where != null ? where.split(",") : null;
 	    
 	    HttpClientOptions requestOptions = new HttpClientOptions()
 				.setDefaultHost("localhost")
@@ -81,13 +99,11 @@ public class MainHttpServer extends AbstractVerticle {
 		HttpServerResponse response = routingContext.response();
 		
 		try {
-			parser.parse(0);
-			List<List<String>> result_VTS = parser.getTable().getIndexes().get(0).getIndexCol().get(0).get("VTS")/*.size()*/;
-			JsonObject currentData = new JsonObject();
-			currentData.put("result_"+port, result_VTS);
+
+			int result_VTS = parser.getTable().getIndexes().get(0).getIndexCol().get(0).get("VTS").size();
 			
 			response.putHeader("Content-Type", "application/json").setChunked(true);
-			response.write(currentData.encode());
+			response.write(new JsonObject().put("result_"+port, result_VTS).encode());
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -104,8 +120,8 @@ public class MainHttpServer extends AbstractVerticle {
 	private void getFromOtherPorts(RoutingContext routingContext) {
 		HttpServerResponse response = routingContext.response();
 		
-		Future<JsonObject> getOtherPort1 = getFromPort(Integer.parseInt(otherPorts[0]));
-		Future<JsonObject> getOtherPort2 = getFromPort(Integer.parseInt(otherPorts[1]));
+		Future<JsonObject> getOtherPort1 = getFromPort(Integer.parseInt(otherPorts[0]), null, null);
+		Future<JsonObject> getOtherPort2 = getFromPort(Integer.parseInt(otherPorts[1]), null, null);
 
 		// simultaneously get data from 2 sibling ports
 		CompositeFuture.join(getOtherPort1, getOtherPort2).setHandler(ar -> {
@@ -131,6 +147,8 @@ public class MainHttpServer extends AbstractVerticle {
 		String select = routingContext.request().params().get("select");
 		String where = routingContext.request().params().get("where");
 		
+		Console.log(select);
+		Console.log(where);
 		
 		Future<JsonObject> getCurrentPort = getFromPort(port, select, where);
 		Future<JsonObject> getOtherPort1 = getFromPort(Integer.parseInt(otherPorts[0]), select, where);
