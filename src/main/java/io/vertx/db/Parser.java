@@ -32,7 +32,7 @@ public class Parser {
 	
 	private int numPort;
 	private static String workingDirectory = System.getProperty("user.dir");
-	private static String dataFileName = ROOT+"rawTest0.csv"; //file source
+	private static String dataFileName = ROOT+"rawTest.csv"; //file source
 	public static String dataFileSearch; //new file to be searched data
 
 	protected Table table;
