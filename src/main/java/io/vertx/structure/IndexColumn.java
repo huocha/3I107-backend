@@ -1,6 +1,8 @@
 package io.vertx.structure;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,7 +23,7 @@ public class IndexColumn {
 	protected Map<String, List<Integer>> index = new HashMap<String, List<Integer>>();
 	protected int nbLines ;
 	protected int idCol; //index by number of Column
-	
+	public String fileSearch = Parser.getWorkingDirectory()+Parser.getDataFileSearch();
 	
 	public IndexColumn(int n) {
 		this.idCol = n;
@@ -65,24 +67,24 @@ public class IndexColumn {
 
 	}
 
-	public List<List<String>> get(String searchedKey) throws IOException{
+	public List<String> get(String searchedKey) throws IOException{
 		List<Integer> rows = index.get(searchedKey);
 		
 		if (rows == null) { return null; }
 		
-		List<List<String>> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 		int tmp=0;
 
-		String fileParsed = Parser.getWorkingDirectory()+Parser.getDataFileSearch();
 		try (BufferedReader reader = Files.newBufferedReader(
-		        Paths.get(fileParsed), StandardCharsets.UTF_8)) {
+		        Paths.get(fileSearch), StandardCharsets.UTF_8)) {
 			
 			for(Integer row: rows) {
+				
 				List<String> line = reader.lines()
 					 					.skip(row-tmp-1)
                      					.limit(1)
                      					.collect(Collectors.toList());
-				result.add(line);
+				result.addAll(line);
 				tmp=row;
 			}
 		 
@@ -94,16 +96,18 @@ public class IndexColumn {
 		return result;
 	}
 	
-	public List<List<String>> getWithoutIndex(String key){
-		List<List<String>> result = new ArrayList<>();
-		Scanner scanner = new Scanner(Parser.getWorkingDirectory()+Parser.getDataFileSearch());
+	public List<String> getWithoutIndex(int index, String key) throws FileNotFoundException{
+		List<String> result = new ArrayList<>();
+		File file = new File(fileSearch);
+		Scanner scanner = new Scanner(file);
 		
 		while (scanner.hasNext()) {
-     		String thisLine=scanner.nextLine();
+     		String thisLine=scanner.nextLine().toUpperCase(); // avoid case sensitive Cash, CASH, cash
      		List<String> line = Arrays.asList(thisLine.split(","));
-			if (line.get(0).equals(key)) {
-				result.add(line);
-			}
+     		
+     		if(index < line.size() && line.get(index).equals(key.toUpperCase())) {
+     			result.add(thisLine);
+     		}
 		}
 		
 		scanner.close();

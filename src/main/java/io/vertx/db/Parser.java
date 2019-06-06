@@ -1,30 +1,55 @@
 package io.vertx.db;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 
+import io.vertx.core.json.JsonObject;
 import io.vertx.structure.Index;
 import io.vertx.structure.IndexColumn;
 import io.vertx.structure.Table;
 import io.vertx.utils.Console;
+import io.vertx.utils.Helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.rmi.CORBA.Util;
 
 public class Parser {
 
 	private static final String DEFAULT_SEPARATOR = ",";
 	private static final String DEFAULT_QUOTE = "'";
+	public static final String ROOT = "/ressource/";
+	
 	private int numPort;
-
 	private static String workingDirectory = System.getProperty("user.dir");
-	private static String dataFileName = "/ressource/rawTest.csv"; //file source
-	private static String dataFileSearch = "/ressource/"; //new file to be searched data
+	private static String dataFileName = ROOT+"rawTest.csv"; //file source
+	public static String dataFileSearch; //new file to be searched data
 
-	protected  Table table;
+	protected Table table;
 
+	protected static ArrayList<IndexColumn> columns = new ArrayList<IndexColumn>();
+
+	protected static File file = new File(workingDirectory+dataFileName);
+
+	protected static Index newIndex = new Index();
+	
+	public static String firstLine;
+	public Parser(int port) { 
+		this.table = new Table(); 
+		this.numPort=port%10;
+		this.dataFileSearch = ROOT+"rawTest"+this.numPort+".txt";
+	}
+	
 	public Table getTable() {
 		return table;
 	}
@@ -33,18 +58,6 @@ public class Parser {
 		this.table = table;
 	}
 
-
-	protected static ArrayList<IndexColumn> columns = new ArrayList<IndexColumn>();
-
-	protected static File file = new File(workingDirectory+dataFileName);
-	//protected static IndexColumn indexCol = new IndexColumn();
-	protected static Index newIndex = new Index();
-
-	public Parser(int port) { 
-		this.table = new Table(); this.numPort=port%10;
-		this.dataFileSearch=this.dataFileSearch+"rawTest"+this.numPort+".txt";
-	}
-	
 	public static String getDataFileSearch() {
 		return dataFileSearch;
 	}
@@ -55,6 +68,10 @@ public class Parser {
 
 	public static String getDataFileName() {
 		return dataFileName;
+	}
+	
+	public static String getColName() {
+		return firstLine;
 	}
 	
 	public void parseWithPort(String line, Table table) {
@@ -72,16 +89,15 @@ public class Parser {
 
         Scanner scanner = new Scanner(file);
 
-        String[] firstLine = scanner.nextLine().split(DEFAULT_SEPARATOR); // firstLine is name of columns
+        Parser.firstLine = scanner.nextLine().toUpperCase();/*.split(DEFAULT_SEPARATOR);*/ // firstLine is name of columns
+        
+        scanner.nextLine(); //pass the line with ","
 
-        scanner.nextLine();//pass the line with ","
-
-        //IndexColumn firstColumn = new IndexColumn(0); // IndexColumn by the first column->numero 0 , ie: vendor_name
         IndexColumn firstColumn = new IndexColumn(numColumnToIndex); //IndexColumn by the numero : numColumnToIndex column->numero 0 , ie: vendor_name
         Index indexFirstColumn = new Index();
         indexFirstColumn.insert(firstColumn);
 
-        File fileSearch = new File(workingDirectory+this.getDataFileSearch());
+        File fileSearch = new File(workingDirectory+Parser.getDataFileSearch());
         boolean fileIsExisted = fileSearch.exists(); //check if the file research existe?
         PrintWriter  pw=  null;
 
@@ -95,9 +111,9 @@ public class Parser {
         	while (scanner.hasNext()) {
         		numLigne=(numLigne%3) +1;
         		String thisLine = scanner.nextLine();
+        		
         		if (numLigne==this.numPort) { //numero line correspond numero port
 	        		
-	
 	        		if (!fileIsExisted) pw.println(thisLine); //write new file
 	
 	        		parseLine(thisLine, indexFirstColumn.getIndexCol().get(0));
@@ -128,6 +144,30 @@ public class Parser {
     	if( line != null && line.size() >= 1 ) {
     		indexColumn.insert(line);
     	}
+    }
+    
+    
+    public JsonObject findMany(HashMap<Integer, String> conds) throws IOException {
+    	JsonObject result = new JsonObject();
+ 
+    	List<List<String>> result1 = new ArrayList<>() ;
+    	
+    	for(Integer key: conds.keySet()) {
+    		String value = conds.get(key);
+    		if(key==0) {
+    			result1.add(this.table.getIndexes().get(0).getIndexCol().get(0).get(value)); 
+    		}
+    		else {
+    			result1.add(this.table.getIndexes().get(0).getIndexCol().get(0).getWithoutIndex(key, value));
+    		}
+		}
+    	
+    	List<String> toReturn = Helper.intersection(result1);
+    	if(toReturn.size() > 0) {
+    		result.put("result_"+numPort, toReturn);
+    	}
+    	
+    	return result;
     }
 
 }

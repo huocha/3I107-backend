@@ -32,7 +32,7 @@ public class MainHttpClient {
 		 * Deploy server
 		 */
 		
-		DeploymentOptions options = new DeploymentOptions().setConfig(config);
+		DeploymentOptions options = new DeploymentOptions().setWorker(true).setConfig(config);
 		
 		setTimeout(() -> vertx.deployVerticle(MainHttpServer.class, options), 2000);
 	
